@@ -1,3 +1,4 @@
 [Service]
 Type=forking
+User=you
 ExecStart=/usr/local/bin/yubilock systemd-event /home/you/yubilock.yaml %I
