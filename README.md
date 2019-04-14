@@ -5,13 +5,19 @@ screen using whatever lockscreen software you are using. It makes use of
 YubiKey's HMAC-SHA1 challenge-response mechanism and does not sorely rely
 on USB device IDs or serial numbers.
 
-## Usage
+## Installation
 
     $ go get github.com/xrstf/yubilock
 
-Make sure you have `libpam-yubico` (or equivalent on your distro) installed
-and then use the `ykpamcfg` tool to perform the initial challenge-response
-and record the response in a state file in `/home/you/.yubico`:
+You also need some standard YubiKey tools installed:
+
+* `ykpamcfg` (Ubuntu: `libpam-yubico`)
+* `ykchalresp` (Ubuntu: `yubikey-personalization`)
+
+## Usage
+
+Use the `ykpamcfg` tool to perform the initial challenge-response and record
+the response in a state file in `/home/you/.yubico`:
 
     $ ykpamcfg -2
 
@@ -68,6 +74,14 @@ ACTION=="remove", ATTRS{idVendor}=="1050", ATTRS{idProduct}=="0407", RUN+="/bin/
 That's it. Every time a YubiKey is plugged or unplugged, yubilock is being
 executed and checks if the lockscreen has to be started or a challenge-reponse
 run should be executed.
+
+## FAQ
+
+### Why is this not a long-running process?
+
+Because I did not want to tie myself to any lifecycle management from the
+init system. Just quickly handling USB events makes it easier to react to
+cases where the lockscreen was started manually.
 
 ## License
 
