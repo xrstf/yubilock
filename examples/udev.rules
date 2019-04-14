@@ -1,0 +1,2 @@
+ACTION=="add", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTRS{product}=="YubiKey OTP+FIDO+CCID", RUN+="/bin/systemctl start yubikey@add.service"
+ACTION=="remove", ATTRS{idVendor}=="1050", ATTRS{idProduct}=="0407", RUN+="/bin/systemctl start yubikey@remove.service"

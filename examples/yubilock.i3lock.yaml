@@ -1,0 +1,6 @@
+stateFile: /home/you/.yubico/challenge-1234567
+lockCommand: ["/bin/bash", "-c", "DISPLAY=:0 /usr/local/bin/i3lock -n"]
+unlockCommand: ["pkill", "-1", "i3lock"]
+lockedCommand: ["pgrep", "i3lock"]
+user: you
+# verbose: true
