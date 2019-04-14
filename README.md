@@ -22,19 +22,30 @@ Create a configuration file, e.g. in `/home/you/yubilock.yml`:
 
 ```yaml
 stateFile: /home/you/.yubico/challenge-9736685
-serialIDs: ["Yubico_YubiKey_OTP+FIDO+CCID"]
-lockCommand: ["/home/you/.config/i3/lock.sh"]
-unlockCommand: ["/bin/bash", "-c", "pkill -1 i3lock || true"]
-lockedCommand: ["/bin/bash", "-c", "pgrep -u xrstf i3lock"]
+lockCommand: ["/bin/bash", "-c", "DISPLAY=:0 /usr/local/bin/i3lock -n"]
+unlockCommand: ["pkill", "-1", "i3lock"]
+lockedCommand: ["pgrep", "i3lock"]
+user: you
 ```
 
-Configure udev rules by creating a `/etc/udev/rules.d/90-yubikey.rules` file
+udev does not allow forking and will always reap orphan processes. To work
+around this, we make use of a systemd service and just trigger that service.
+Create a new service in `/etc/systemd/system/yubilock@.service`:
+
+```
+[Service]
+Type=forking
+ExecStart=/usr/local/bin/yubilock systemd-event /home/you/yubilock.yaml %I
+```
+
+We can now trigger the yubilock service by defining proper udev rules.
+Configure the rules by creating a `/etc/udev/rules.d/90-yubikey.rules` file
 with this content:
 
-    ATTR{product}!="YubiKey OTP+FIDO+CCID", GOGO="yubikey_end"
-    ACTION=="remove", RUN+="/home/you/go/bin/yubilock udev-event /home/you/yubilock.yaml"
-    ACTION=="add", RUN+="/home/you/go/bin/yubilock udev-event /home/you/yubilock.yaml"
-    LABEL="yubikey_end"
+```
+ACTION=="add", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTRS{product}=="YubiKey OTP+FIDO+CCID", RUN+="/bin/systemctl start yubilock@add.service"
+ACTION=="remove", ATTRS{idVendor}=="1050", ATTRS{idProduct}=="0407", RUN+="/bin/systemctl start yubilock@remove.service"
+```
 
 That's it. Every time a YubiKey is plugged or unplugged, yubilock is being
 executed and checks if the lockscreen has to be started or a challenge-reponse
