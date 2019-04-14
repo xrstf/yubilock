@@ -1,6 +1,25 @@
-stateFile: /home/you/.yubico/challenge-1234567
+# ykpamcfg-generated challenge file to use
+stateFile: /home/you/.yubico/challenge-9736685
+
+# command to execute when a YubiKey is removed and the
+# screen is not already locked (as determined by the
+# lockedCommand below)
 lockCommand: ["/bin/bash", "-c", "DISPLAY=:0 /usr/local/bin/i3lock -n"]
+
+# command to execute when a YubiKey is attached and it
+# passed the challenge-response. This command is only
+# executed if the lockedCommand return with code 0.
 unlockCommand: ["pkill", "-1", "i3lock"]
+
+# determines whether the screen is currently locked;
+# return 0 = screen is locked
+#        1 = screen is not locked
 lockedCommand: ["pgrep", "i3lock"]
-user: you
-# verbose: true
+
+# in case the systemd service is not configured to run under
+# your user account, you can make yubilock spawn the commands
+# above explicitely under a given user.
+#user: you
+
+# enable debug logging
+#verbose: true

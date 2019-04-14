@@ -11,7 +11,7 @@ on USB device IDs or serial numbers.
 
 Make sure you have `libpam-yubico` (or equivalent on your distro) installed
 and then use the `ykpamcfg` tool to perform the initial challenge-response
-and record the response in a state fule in `/home/you/.yubico`:
+and record the response in a state file in `/home/you/.yubico`:
 
     $ ykpamcfg -2
 
@@ -21,11 +21,28 @@ Afterwards, look into the directory mentioned above and find your
 Create a configuration file, e.g. in `/home/you/yubilock.yml`:
 
 ```yaml
+# ykpamcfg-generated challenge file to use
 stateFile: /home/you/.yubico/challenge-9736685
+
+# command to execute when a YubiKey is removed and the
+# screen is not already locked (as determined by the
+# lockedCommand below)
 lockCommand: ["/bin/bash", "-c", "DISPLAY=:0 /usr/local/bin/i3lock -n"]
+
+# command to execute when a YubiKey is attached and it
+# passed the challenge-response. This command is only
+# executed if the lockedCommand return with code 0.
 unlockCommand: ["pkill", "-1", "i3lock"]
+
+# determines whether the screen is currently locked;
+# return 0 = screen is locked
+#        1 = screen is not locked
 lockedCommand: ["pgrep", "i3lock"]
-user: you
+
+# in case the systemd service is not configured to run under
+# your user account, you can make yubilock spawn the commands
+# above explicitely under a given user.
+#user: you
 ```
 
 udev does not allow forking and will always reap orphan processes. To work
@@ -35,6 +52,7 @@ Create a new service in `/etc/systemd/system/yubilock@.service`:
 ```
 [Service]
 Type=forking
+User=you
 ExecStart=/usr/local/bin/yubilock systemd-event /home/you/yubilock.yaml %I
 ```
 
